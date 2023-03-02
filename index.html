@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>キャラクター設定サイト</title>
+	<style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+			margin-bottom: 10px;
+		}
+		table td, table th {
+			border: 1px solid #ddd;
+			padding: 8px;
+			text-align: left;
+		}
+		table th {
+			background-color: #f2f2f2;
+		}
+	</style>
+</head>
+<body>
+	<h1>キャラクター設定サイト</h1>
+	<h2>新規キャラクターの登録</h2>
+	<form id="character-form">
+		<label for="name">名前:</label>
+		<input type="text" id="name" name="name"><br><br>
+		<label for="description">設定:</label><br>
+		<textarea id="description" name="description" rows="4" cols="50"></textarea><br><br>
+		<button type="submit">登録</button>
+	</form>
+	<h2>登録済みキャラクター一覧</h2>
+	<table id="character-table">
+		<thead>
+			<tr>
+				<th>名前</th>
+				<th>設定</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<script>
+		const form = document.getElementById('character-form');
+		const table = document.getElementById('character-table').getElementsByTagName('tbody')[0];
+		let characters = [];
+
+		// フォームの送信イベントをリスナーに追加
+		form.addEventListener('submit', (event) => {
+			event.preventDefault(); // デフォルトの送信を防止
+
+			const name = document.getElementById('name').value.trim();
+			const description = document.getElementById('description').value.trim();
+
+			if (name === '' || description === '') {
+				alert('名前と設定を入力してください');
+				return;
+			}
+
+			// 新しいキャラクターを作成
+			const character = {
+				id: characters.length,
+				name: name,
+				description: description
+			};
+
+			// 配列に追加
+			characters.push(character);
+
+			// テーブルに行を追加
+			const row = table.insertRow();
+			const nameCell = row.insertCell();
+			const descriptionCell = row.insertCell();
+			const deleteCell = row.insertCell();
+
+			nameCell.textContent = character.name;
+			descriptionCell.textContent = character.description;
+			deleteCell.innerHTML = '<button data-id="' + character.id + '">削除</button>';
+
+			// 削除ボタンのクリックイベントをリスナーに追加
+			deleteCell.querySelector('button').addEventListener('click', () => {
+				const id = parseInt(deleteCell.querySelector('button').getAttribute('data-id'));
+				deleteCharacter(id);
+			});
+
+			// フォームをクリア
+		
+
+		document.getElementById('name').value = '';
+		document.getElementById('description').value = '';
+	});
+
+	// キャラクターを削除する関数
+	function deleteCharacter(id) {
+		// 配列から削除
+		characters = characters.filter(character => character.id !== id);
+
+		// テーブルから削除
+		for (let i = 0; i < table.rows.length; i++) {
+			const row = table.rows[i];
+			const button = row.querySelector('button[data-id="' + id + '"]');
+			if (button) {
+				row.remove();
+				break;
+			}
+		}
+	}
+
+	// 初期データの読み込み
+	if (localStorage.getItem('characters')) {
+		characters = JSON.parse(localStorage.getItem('characters'));
+		for (let i = 0; i < characters.length; i++) {
+			const character = characters[i];
+
+			// テーブルに行を追加
+			const row = table.insertRow();
+			const nameCell = row.insertCell();
+			const descriptionCell = row.insertCell();
+			const deleteCell = row.insertCell();
+
+			nameCell.textContent = character.name;
+			descriptionCell.textContent = character.description;
+			deleteCell.innerHTML = '<button data-id="' + character.id + '">削除</button>';
+
+			// 削除ボタンのクリックイベントをリスナーに追加
+			deleteCell.querySelector('button').addEventListener('click', () => {
+				const id = parseInt(deleteCell.querySelector('button').getAttribute('data-id'));
+				deleteCharacter(id);
+			});
+		}
+	}
+
+	// ページを離れるときにデータを保存
+	window.addEventListener('beforeunload', () => {
+		localStorage.setItem('characters', JSON.stringify(characters));
+	});
+</script>
+</body>
+</html>
